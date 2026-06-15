@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell($fnmPath = \"C:\\\\Users\\\\user\\\\AppData\\\\Local\\\\fnm_multishells\\\\9908_1781500856586\"; $env:PATH = \"$fnmPath;$env:PATH\"; npx playwright install chromium 2>&1 | Select-Object -Last 8)",
+      "PowerShell($fnmPath = \"C:\\\\Users\\\\user\\\\AppData\\\\Local\\\\fnm_multishells\\\\9908_1781500856586\"; $env:PATH = \"$fnmPath;$env:PATH\"; $globalNpm = npm root -g; \"Global npm: $globalNpm\"; Get-ChildItem \"$globalNpm\\\\@playwright\" -ErrorAction SilentlyContinue | Select-Object Name)",
+      "PowerShell($fnmPath = \"C:\\\\Users\\\\user\\\\AppData\\\\Local\\\\fnm_multishells\\\\9908_1781500856586\"; $env:PATH = \"$fnmPath;$env:PATH\"; $nodePath = \\(Get-Command node\\).Source; \"node: $nodePath\"; $mcpBin = \"$\\(\\(npm root -g\\)\\)\\\\@playwright\\\\mcp\\\\cli.js\"; if \\(Test-Path $mcpBin\\) { \"mcp cli: $mcpBin\" } else { Get-ChildItem \"$\\(\\(npm root -g\\)\\)\\\\@playwright\\\\mcp\" | Select-Object Name })",
+      "Read(//c/Users/user/.claude/**)",
+      "PowerShell(try { $r = Invoke-WebRequest -Uri \"http://localhost:3000/Source%20One%20Payroll%20Cloud.html\" -UseBasicParsing -TimeoutSec 3; \"Server UP: $\\($r.StatusCode\\)\" } catch { \"Server DOWN - restarting...\"; Get-Process -Name python -ErrorAction SilentlyContinue | Stop-Process -Force; Start-Sleep -Milliseconds 300; Start-Process -FilePath \"python\" -ArgumentList \"-m http.server 3000\" -WorkingDirectory \"c:\\\\Users\\\\user\\\\Downloads\\\\payroll helper\" -WindowStyle Hidden; Start-Sleep -Seconds 2; try { $r2 = Invoke-WebRequest -Uri \"http://localhost:3000/Source%20One%20Payroll%20Cloud.html\" -UseBasicParsing -TimeoutSec 5; \"Server UP: $\\($r2.StatusCode\\)\" } catch { \"FAILED: $_\" } })"
+    ],
+    "additionalDirectories": [
+      "c:\\Users\\user\\.claude"
+    ]
+  }
+}

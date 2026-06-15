@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+  <meta name="theme-color" content="#0D1117"/>
+
+  <!-- SEO -->
+  <title>HRFlow — People & Payroll Management</title>
+  <meta name="description"
+    content="HRFlow is a modern HR and payroll management platform for managing employees, running payroll, generating reports, and configuring team settings."/>
+  <meta name="robots" content="noindex, nofollow"/>
+
+  <!-- Open Graph -->
+  <meta property="og:type"        content="website"/>
+  <meta property="og:title"       content="HRFlow — People & Payroll Management"/>
+  <meta property="og:description" content="Modern HR and payroll management for growing teams."/>
+  <meta property="og:site_name"   content="HRFlow"/>
+
+  <!-- Favicon placeholder (swap with real .ico / .svg in production) -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%236366F1'/><text x='50%' y='55%' dominant-baseline='middle' text-anchor='middle' font-family='Inter,sans-serif' font-weight='800' font-size='14' fill='white'>HF</text></svg>"/>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet" media="print" onload="this.media='all'"/>
+  <noscript>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  </noscript>
+
+  <!-- Font Awesome 6 Free -->
+  <link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"/>
+
+  <!-- App stylesheets (cascade order matters) -->
+  <link rel="stylesheet" href="styles/base.css"/>
+  <link rel="stylesheet" href="styles/layout.css"/>
+  <link rel="stylesheet" href="styles/components.css"/>
+
+  <!-- Loading screen styles (removed once React mounts) -->
+  <style>
+    #app-loader {
+      position: fixed; inset: 0;
+      background: #0D1117;
+      display: flex; align-items: center; justify-content: center;
+      flex-direction: column; gap: 16px;
+      z-index: 999; transition: opacity 300ms ease;
+    }
+    #app-loader.hidden { opacity: 0; pointer-events: none; }
+    .loader-logo {
+      width: 48px; height: 48px; border-radius: 12px;
+      background: linear-gradient(135deg, #6366F1, #818CF8);
+      display: flex; align-items: center; justify-content: center;
+      font-family: Inter, sans-serif; font-weight: 800; color: #fff; font-size: 18px;
+      box-shadow: 0 0 32px rgba(99,102,241,0.4);
+    }
+    .loader-ring {
+      width: 28px; height: 28px;
+      border: 2px solid rgba(255,255,255,0.1);
+      border-top-color: #6366F1;
+      border-radius: 50%;
+      animation: spin 700ms linear infinite;
+    }
+    .loader-text { font-family: Inter, sans-serif; font-size: 13px; color: #484F58; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+  <!-- Loading screen (visible before React hydrates) -->
+  <div id="app-loader" role="status" aria-label="Loading HRFlow">
+    <div class="loader-logo">HF</div>
+    <div class="loader-ring"></div>
+    <div class="loader-text">Loading HRFlow…</div>
+  </div>
+
+  <!-- React root -->
+  <div id="root"></div>
+
+  <!-- No-JS fallback -->
+  <noscript>
+    <div style="font-family:Inter,sans-serif;text-align:center;padding:60px 24px;color:#8B949E;background:#0D1117;min-height:100vh;">
+      <div style="font-size:32px;margin-bottom:12px;">⚠️</div>
+      <h1 style="color:#E6EDF3;font-size:20px;margin-bottom:8px;">JavaScript Required</h1>
+      <p>HRFlow requires JavaScript to run. Please enable JavaScript in your browser settings and refresh the page.</p>
+    </div>
+  </noscript>
+
+  <!-- React 18 + ReactDOM (UMD production build) -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+
+  <!-- Babel standalone (in-browser JSX transform — swap for pre-compiled bundle in production) -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <!-- Dismiss loader once DOM is interactive -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // React will call ReactDOM.createRoot() — after first render, remove the loader
+      var orig = ReactDOM.createRoot;
+      ReactDOM.createRoot = function(container) {
+        var root = orig.call(this, container);
+        var origRender = root.render.bind(root);
+        root.render = function(el) {
+          origRender(el);
+          requestAnimationFrame(function() {
+            var loader = document.getElementById('app-loader');
+            if (loader) { loader.classList.add('hidden'); setTimeout(function() { loader.remove(); }, 350); }
+          });
+        };
+        return root;
+      };
+    });
+  </script>
+
+  <!-- ── 1. Data layer (pure JS, no JSX) ─────────────────────── -->
+  <script src="data/mock-data.js"></script>
+
+  <!-- ── 2. Shared UI components ─────────────────────────────── -->
+  <script type="text/babel" src="components/ui.js"></script>
+  <script type="text/babel" src="components/charts.js"></script>
+  <script type="text/babel" src="components/layout.js"></script>
+
+  <!-- ── 3. Pages ────────────────────────────────────────────── -->
+  <script type="text/babel" src="pages/dashboard.js"></script>
+  <script type="text/babel" src="pages/employees.js"></script>
+  <script type="text/babel" src="pages/payroll.js"></script>
+  <script type="text/babel" src="pages/reports.js"></script>
+  <script type="text/babel" src="pages/settings.js"></script>
+
+  <!-- ── 4. App root ─────────────────────────────────────────── -->
+  <script type="text/babel" src="app.js"></script>
+</body>
+</html>
