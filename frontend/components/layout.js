@@ -1,19 +1,33 @@
 // ── App shell layout components ───────────────────────────────
 const { useState } = React;
 
-// ── Navigation config ─────────────────────────────────────────
-const NAV_ITEMS = [
+// ── Full navigation catalog ────────────────────────────────────
+const ALL_NAV_ITEMS = [
   { section: 'Main' },
-  { id: 'dashboard', label: 'Dashboard',  icon: 'gauge' },
+  { id: 'dashboard', label: 'Dashboard',   icon: 'gauge' },
   { section: 'People' },
-  { id: 'employees', label: 'Employees',  icon: 'users', badge: '2' },
+  { id: 'employees', label: 'Employees',   icon: 'users', badge: '2' },
   { section: 'Payroll' },
-  { id: 'payroll',   label: 'Payroll Run',icon: 'money-bill-wave', badge: 'Now' },
+  { id: 'payroll',   label: 'Payroll Run', icon: 'money-bill-wave', badge: 'Now' },
   { section: 'Insights' },
-  { id: 'reports',   label: 'Reports',    icon: 'chart-bar' },
+  { id: 'reports',   label: 'Reports',     icon: 'chart-bar' },
   { section: 'Admin' },
-  { id: 'settings',  label: 'Settings',   icon: 'gear' },
+  { id: 'settings',  label: 'Settings',    icon: 'gear' },
 ];
+
+function buildNavItems(role) {
+  const allowed = getPortalNav(role);
+  const out = [];
+  let lastSection = null;
+  for (const item of ALL_NAV_ITEMS) {
+    if (item.section) { lastSection = item; continue; }
+    if (allowed.includes(item.id)) {
+      if (lastSection) { out.push(lastSection); lastSection = null; }
+      out.push(item);
+    }
+  }
+  return out;
+}
 
 const PAGE_TITLES = {
   dashboard: 'Dashboard',
@@ -24,8 +38,15 @@ const PAGE_TITLES = {
 };
 
 // ── Sidebar ───────────────────────────────────────────────────
-const Sidebar = ({ currentPage, onNavigate }) => {
+const Sidebar = ({ currentPage, onNavigate, currentUser, onLogout }) => {
   const [hoveredItem, setHoveredItem] = useState(null);
+  const navItems  = buildNavItems(currentUser?.role || 'read_only');
+  const roleMeta  = ROLE_META[currentUser?.role] || { label: 'User', color: '#8B949E' };
+
+  const handleLogout = () => {
+    authClearSession();
+    onLogout();
+  };
 
   return (
     <aside className="sidebar">
@@ -40,7 +61,7 @@ const Sidebar = ({ currentPage, onNavigate }) => {
 
       {/* Navigation */}
       <nav className="sidebar-nav">
-        {NAV_ITEMS.map((item, i) => {
+        {navItems.map((item, i) => {
           if (item.section) {
             return <div key={'s' + i} className="nav-section-label">{item.section}</div>;
           }
@@ -64,13 +85,15 @@ const Sidebar = ({ currentPage, onNavigate }) => {
 
       {/* User footer */}
       <div className="sidebar-footer">
-        <Avatar name="Priya Kapoor" size="sm" status="active"/>
+        <Avatar name={currentUser?.name || 'User'} size="sm" status="active"/>
         <div className="sidebar-user-info">
-          <div className="sidebar-user-name">Priya Kapoor</div>
-          <div className="sidebar-user-role">Super Admin</div>
+          <div className="sidebar-user-name">{currentUser?.name || 'User'}</div>
+          <div className="sidebar-user-role" style={{ color: roleMeta.color }}>
+            {roleMeta.label}
+          </div>
         </div>
         <button className="icon-btn" title="Sign out" style={{ width: 28, height: 28, flexShrink: 0 }}
-          onClick={() => window.showToast('Signed out', 'info')}>
+          onClick={handleLogout}>
           <Icon name="right-from-bracket" size={11}/>
         </button>
       </div>
@@ -79,7 +102,7 @@ const Sidebar = ({ currentPage, onNavigate }) => {
 };
 
 // ── Topbar ────────────────────────────────────────────────────
-const Topbar = ({ currentPage, onSearch, onToggleTheme }) => {
+const Topbar = ({ currentPage, onSearch, onToggleTheme, currentUser }) => {
   const [searchVal, setSearchVal] = useState('');
   const searchRef = React.useRef(null);
   const title = PAGE_TITLES[currentPage] || '';
@@ -154,10 +177,12 @@ const Topbar = ({ currentPage, onSearch, onToggleTheme }) => {
         {/* User */}
         <div className="topbar-user">
           <div className="topbar-user-info">
-            <div className="topbar-user-name">Priya Kapoor</div>
-            <div className="topbar-user-role">Super Admin</div>
+            <div className="topbar-user-name">{currentUser?.name || 'User'}</div>
+            <div className="topbar-user-role" style={{ color: (ROLE_META[currentUser?.role] || {}).color }}>
+              {(ROLE_META[currentUser?.role] || { label: 'User' }).label}
+            </div>
           </div>
-          <Avatar name="Priya Kapoor" size="sm" status="active"/>
+          <Avatar name={currentUser?.name || 'User'} size="sm" status="active"/>
         </div>
       </div>
     </header>

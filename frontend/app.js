@@ -1,4 +1,4 @@
-// ── Root app — routing + global state ────────────────────────
+// ── Root app — auth + routing + global state ──────────────────
 const { useState, useEffect } = React;
 
 const PAGE_MAP = {
@@ -13,6 +13,7 @@ const PAGE_MAP = {
 const SEARCHABLE_PAGES = ['employees', 'payroll', 'reports'];
 
 function App() {
+  const [currentUser, setCurrentUser] = useState(() => authGetSession());
   const [page,        setPage]        = useState('dashboard');
   const [theme,       setTheme]       = useState('dark');
   const [globalQuery, setGlobalQuery] = useState('');
@@ -25,26 +26,75 @@ function App() {
   // Clear search when navigating to a new page
   useEffect(() => { setGlobalQuery(''); }, [page]);
 
+  // When user logs in, land on the first page of their portal
+  const handleLogin = (user) => {
+    const firstPage = getPortalNav(user.role)[0] || 'dashboard';
+    setPage(firstPage);
+    setCurrentUser(user);
+  };
+
+  const handleLogout = () => {
+    setCurrentUser(null);
+    setPage('dashboard');
+    setGlobalQuery('');
+    window.showToast('Signed out successfully', 'info');
+  };
+
   const toggleTheme = () => setTheme(t => t === 'dark' ? 'light' : 'dark');
 
   const handleSearch = (q) => {
     setGlobalQuery(q);
     if (q && !SEARCHABLE_PAGES.includes(page)) {
-      // Auto-navigate to Employees when searching from a non-searchable page
       setPage('employees');
     }
   };
 
-  const Screen = PAGE_MAP[page] || Dashboard;
+  // Guard: navigate only to pages the role can access
+  const handleNavigate = (id) => {
+    const allowed = getPortalNav(currentUser?.role || 'read_only');
+    if (allowed.includes(id)) setPage(id);
+  };
+
+  // ── Not authenticated → show login ──────────────────────────
+  if (!currentUser) {
+    return (
+      <>
+        <div className="app-bg" aria-hidden="true"/>
+        <LoginPage onLogin={handleLogin}/>
+        <ToastHost/>
+      </>
+    );
+  }
+
+  // ── Authenticated → show role portal ────────────────────────
+  const allowedPages = getPortalNav(currentUser.role);
+  const activePage   = allowedPages.includes(page) ? page : allowedPages[0];
+  const Screen       = PAGE_MAP[activePage] || Dashboard;
+
+  // Expose to pages so they can check edit permissions
+  window.hrflowUser = currentUser;
 
   return (
     <>
       <div className="app-bg" aria-hidden="true"/>
       <div className="app-shell">
-        <Sidebar currentPage={page} onNavigate={setPage}/>
-        <Topbar currentPage={page} onSearch={handleSearch} onToggleTheme={toggleTheme}/>
-        <main className="canvas" key={page}>
-          <Screen searchQuery={globalQuery}/>
+        <Sidebar
+          currentPage={activePage}
+          onNavigate={handleNavigate}
+          currentUser={currentUser}
+          onLogout={handleLogout}
+        />
+        <Topbar
+          currentPage={activePage}
+          onSearch={handleSearch}
+          onToggleTheme={toggleTheme}
+          currentUser={currentUser}
+        />
+        <main className="canvas" key={activePage}>
+          <Screen
+            searchQuery={globalQuery}
+            canEdit={canEditPage(currentUser.role, activePage)}
+          />
         </main>
       </div>
       <ToastHost/>
